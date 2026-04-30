@@ -2,25 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { sendChatMessage } from '../api/client'
 
-/**
- * ChatPanel.jsx
- * -------------
- * Global floating chatbot that lets users have a conversation with the AI
- * about their portfolio, market conditions, and investment strategy.
- *
- * Features
- * --------
- * - Floating action button (bottom-right) with pulse animation
- * - Slide-up chat panel with dark glass morphism design
- * - Message history with ReactMarkdown rendering
- * - Passes conversation history for multi-turn context
- * - Loading indicator during AI inference
- * - Suggested quick prompts for first interaction
- *
- * @param {object} props
- * @param {string} props.portfolioId
- */
-
 const QUICK_PROMPTS = [
   "What's my portfolio's biggest risk right now?",
   "Which stocks should I consider buying?",
@@ -90,7 +71,6 @@ export default function ChatPanel({ portfolioId }) {
 
   return (
     <>
-      {/* ── Floating action button ──────────────────────────────────────── */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-2xl
@@ -118,7 +98,6 @@ export default function ChatPanel({ portfolioId }) {
         )}
       </button>
 
-      {/* ── Chat panel ──────────────────────────────────────────────────── */}
       <div
         className={`fixed bottom-24 right-6 z-50 w-96 max-w-[calc(100vw-3rem)]
                     transition-all duration-300 origin-bottom-right
@@ -131,7 +110,6 @@ export default function ChatPanel({ portfolioId }) {
                         flex flex-col overflow-hidden"
              style={{ height: '32rem', maxHeight: 'calc(100vh - 10rem)' }}
         >
-          {/* ── Header ──────────────────────────────────────────────────── */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#30363d]
                           bg-[#0d1117]/50 shrink-0">
             <div className="flex items-center gap-2.5">
@@ -159,7 +137,6 @@ export default function ChatPanel({ portfolioId }) {
             )}
           </div>
 
-          {/* ── Messages ────────────────────────────────────────────────── */}
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0">
 
             {/* Welcome state */}
@@ -239,7 +216,6 @@ export default function ChatPanel({ portfolioId }) {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* ── Input ───────────────────────────────────────────────────── */}
           <div className="shrink-0 border-t border-[#30363d] p-3 bg-[#0d1117]/50">
             <div className="flex items-end gap-2">
               <textarea

@@ -1,14 +1,7 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { fmtCurrency, fmtPctSigned } from '../utils/format'
 
-/**
- * SectorDonut.jsx
- * ---------------
- * Recharts PieChart displaying portfolio allocation by sector.
- * 
- * @param {object} props
- * @param {Array<{ sector: string, weight: number, market_value: number }>} props.data
- */
+
 
 const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#3b82f6', '#14b8a6', '#64748b']
 

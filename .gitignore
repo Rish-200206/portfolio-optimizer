@@ -22,6 +22,9 @@ build/
 # ── yfinance local parquet price cache ───────────────────────────────────
 backend/price_cache/*.parquet
 
+# ── Auto-generated NSE/BSE ticker list (refreshed weekly at runtime) ─────
+backend/tickers.csv
+
 # ── Environment / secrets ────────────────────────────────────────────────
 .env
 .env.*
@@ -61,5 +64,13 @@ htmlcov/
 # ── Graphify knowledge-graph output (regenerated on demand) ──────────────
 graphify-out/
 
-# ── Private session notes (not for public repo) ──────────────────────────
+# ── Claude Code project instructions & local settings (personal) ─────────
+CLAUDE.md
+.claude/
+
+# ── Private session notes / personal working files ───────────────────────
 session-notes.md
+backend/price_cache/*.json
+
+# ── Local reference PDFs (not part of source) ────────────────────────────
+*.pdf

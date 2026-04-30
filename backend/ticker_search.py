@@ -53,9 +53,6 @@ class TickerRow(TypedDict):
     exchange: str
 
 
-# ---------------------------------------------------------------------------
-# Fetch helpers
-# ---------------------------------------------------------------------------
 
 
 async def _fetch_nse() -> list[TickerRow]:
@@ -94,9 +91,6 @@ async def _fetch_bse() -> list[TickerRow]:
     return rows
 
 
-# ---------------------------------------------------------------------------
-# CSV persistence
-# ---------------------------------------------------------------------------
 
 
 def _save_csv(rows: list[TickerRow]) -> None:
@@ -119,9 +113,6 @@ def _is_stale() -> bool:
     return (time.time() - TICKERS_CSV.stat().st_mtime) > CACHE_TTL_SECONDS
 
 
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
 
 
 async def refresh_tickers() -> int:

@@ -16,7 +16,7 @@ import { currencyFromTicker, currencySymbol } from '../utils/currency'
  *   never clipped by the modal's rounded corners or any overflow:hidden parent.
  */
 export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
-  // ── Ticker combobox ──────────────────────────────────────────────────────
+
   const [inputValue, setInputValue]   = useState('')
   const [ticker, setTicker]           = useState('')
   const [results, setResults]         = useState([])
@@ -26,7 +26,7 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
   const inputRef    = useRef(null)
   const dropdownRef = useRef(null)
 
-  // ── Other form fields ────────────────────────────────────────────────────
+
   const [quantity, setQuantity] = useState('')
   const [price, setPrice]       = useState('')
   const [saving, setSaving]     = useState(false)
@@ -36,7 +36,7 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
   const currency = currencyFromTicker(ticker || inputValue)
   const symbol   = currencySymbol(currency)
 
-  // ── Compute dropdown position anchored to the input element ─────────────
+  // anchor dropdown position to the input
   const openDropdown = (items) => {
     if (!inputRef.current) return
     const rect = inputRef.current.getBoundingClientRect()
@@ -45,7 +45,7 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
     setDropdownOpen(true)
   }
 
-  // ── Debounced search ─────────────────────────────────────────────────────
+
   useEffect(() => {
     const val = inputValue.trim()
     if (val.length < 1) {
@@ -71,7 +71,7 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
     return () => clearTimeout(timer)
   }, [inputValue]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Close dropdown on outside click ─────────────────────────────────────
+  // close on outside click
   useEffect(() => {
     const handler = (e) => {
       if (
@@ -85,7 +85,7 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  // ── Handlers ─────────────────────────────────────────────────────────────
+
   const handleInput = (e) => {
     const val = e.target.value
     setInputValue(val)
@@ -121,7 +121,7 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
     }
   }
 
-  // ── Dropdown portal (renders into document.body — never clipped) ─────────
+  // portal into body so dropdown is never clipped by overflow:hidden
   const dropdown = dropdownOpen && results.length > 0 && dropdownRect
     ? createPortal(
         <ul
@@ -163,7 +163,7 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
       )
     : null
 
-  // ── Render ───────────────────────────────────────────────────────────────
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
@@ -183,7 +183,6 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
 
-          {/* ── Ticker combobox ─────────────────────────────────────────── */}
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-1.5">
               Stock / ETF
@@ -225,7 +224,6 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
             </p>
           </div>
 
-          {/* ── Quantity ─────────────────────────────────────────────────── */}
           <div>
             <label htmlFor="ah-qty" className="block text-sm font-medium text-gray-400 mb-1.5">
               Quantity (shares / units)
@@ -244,7 +242,6 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
             />
           </div>
 
-          {/* ── Average buy price ─────────────────────────────────────────── */}
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-1.5">
               Average Buy Price
@@ -274,7 +271,6 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
             </p>
           </div>
 
-          {/* ── Error ────────────────────────────────────────────────────── */}
           {error && (
             <p className="text-sm text-red-400 bg-red-400/10 border border-red-700/30
                           rounded-lg px-3 py-2">
@@ -282,7 +278,6 @@ export default function AddHoldingModal({ portfolioId, onClose, onSuccess }) {
             </p>
           )}
 
-          {/* ── Actions ──────────────────────────────────────────────────── */}
           <div className="flex gap-3 pt-1">
             <button
               type="button"

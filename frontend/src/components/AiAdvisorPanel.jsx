@@ -2,22 +2,6 @@ import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { getAdvisorAdvice } from '../api/client'
 
-/**
- * AiAdvisorPanel.jsx
- * ------------------
- * Panel that fetches and renders the Ollama LLM portfolio advisory report.
- *
- * States
- * ------
- * idle     → "Generate AI Analysis" CTA button
- * loading  → spinner + estimated wait message (LLM inference can take 10-40s)
- * success  → ReactMarkdown-rendered advisory text with model badge
- * fallback → same as success but with an amber banner noting Ollama is offline
- * error    → error message with retry button
- *
- * @param {object} props
- * @param {string} props.portfolioId
- */
 export default function AiAdvisorPanel({ portfolioId }) {
   const [advice, setAdvice]   = useState(null)   // AdvisorResponse | null
   const [loading, setLoading] = useState(false)
@@ -64,7 +48,6 @@ export default function AiAdvisorPanel({ portfolioId }) {
         </div>
       </div>
 
-      {/* ── Idle: CTA ────────────────────────────────────────────────────── */}
       {!advice && !loading && !error && (
         <div className="flex-1 flex flex-col items-center justify-center gap-4 py-6 text-center">
           <div className="w-14 h-14 rounded-2xl bg-indigo-600/10 border border-indigo-500/20
@@ -101,7 +84,6 @@ export default function AiAdvisorPanel({ portfolioId }) {
         </div>
       )}
 
-      {/* ── Loading ───────────────────────────────────────────────────────── */}
       {loading && (
         <div className="flex-1 flex flex-col items-center justify-center gap-4 py-6 text-center">
           <div className="relative w-12 h-12">
@@ -131,7 +113,6 @@ export default function AiAdvisorPanel({ portfolioId }) {
         </div>
       )}
 
-      {/* ── Error ─────────────────────────────────────────────────────────── */}
       {error && !loading && (
         <div className="flex-1 flex flex-col items-center justify-center gap-3 py-6 text-center">
           <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
@@ -153,7 +134,6 @@ export default function AiAdvisorPanel({ portfolioId }) {
         </div>
       )}
 
-      {/* ── Success: rendered markdown ─────────────────────────────────────── */}
       {advice && !loading && (
         <div className="flex-1 flex flex-col gap-3 min-h-0">
 

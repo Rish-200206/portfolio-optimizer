@@ -12,16 +12,6 @@ const CURRENCY_OPTIONS = [
   { code: 'AUD', label: 'A$ AUD' },
 ]
 
-/**
- * SmartRebalancer.jsx
- * -------------------
- * Calculates exact integer share quantities to buy/sell to reach optimal
- * Sharpe weights given a cash injection. Auto-detects the portfolio currency
- * but lets the user override it.
- * 
- * @param {object} props
- * @param {import('../api/types').PortfolioAnalytics} props.analytics
- */
 export default function SmartRebalancer({ analytics }) {
   const [cashInjection, setCashInjection] = useState(5000)
 

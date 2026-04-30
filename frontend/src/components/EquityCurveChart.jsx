@@ -1,14 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { useMemo } from 'react'
 
-/**
- * EquityCurveChart.jsx
- * --------------------
- * Line chart comparing normalized portfolio performance against a benchmark.
- * 
- * @param {object} props
- * @param {Array<{ date: string, portfolio_value: number, benchmark_value: number }>} props.data
- */
 export default function EquityCurveChart({ data }) {
   if (!data || data.length === 0) {
     return (

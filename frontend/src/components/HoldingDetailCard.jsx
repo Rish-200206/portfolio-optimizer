@@ -1,20 +1,16 @@
 import { fmtCurrency, fmtPctSigned, fmtPnlCurrency, fmtWeight, gainLossClass } from '../utils/format'
+import { currencyFromTicker } from '../utils/currency'
 
 /**
- * HoldingDetailCard.jsx
- * ---------------------
- * Compact metrics panel for one holding, used in the Detail view sidebar.
- * Shows the large P&L figure prominently, then a grid of position stats.
- *
  * @param {object} props
  * @param {import('../api/types').HoldingMetrics} props.holding
  */
 export default function HoldingDetailCard({ holding }) {
   const pnlClass = gainLossClass(holding.unrealized_pnl)
+  const currency = currencyFromTicker(holding.ticker)
 
   return (
     <div className="card p-5 space-y-5 h-full">
-      {/* Section header */}
       <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
         Position Details
       </h3>
@@ -23,30 +19,45 @@ export default function HoldingDetailCard({ holding }) {
       <div>
         <p className="text-xs text-gray-500 mb-1">Unrealised P&amp;L</p>
         <p className={`text-3xl font-bold num ${pnlClass}`}>
-          {fmtPnlCurrency(holding.unrealized_pnl)}
+          {fmtPnlCurrency(holding.unrealized_pnl, currency)}
         </p>
         <p className={`text-sm num mt-0.5 ${pnlClass}`}>
           {fmtPctSigned(holding.unrealized_pnl_pct)}
         </p>
       </div>
 
-      {/* Divider */}
       <hr className="border-surface-border" />
 
       {/* Metrics grid */}
       <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
-        <Metric label="Market Value"   value={fmtCurrency(holding.market_value)} />
-        <Metric label="Cost Basis"     value={fmtCurrency(holding.cost_basis)} />
-        <Metric label="Latest Price"   value={fmtCurrency(holding.latest_price)}
+        <Metric label="Market Value"   value={fmtCurrency(holding.market_value, currency)} />
+        <Metric label="Cost Basis"     value={fmtCurrency(holding.cost_basis, currency)} />
+        <Metric label="Latest Price"   value={fmtCurrency(holding.latest_price, currency)}
           sub={holding.price_is_estimated ? '⚠ estimated' : undefined}
           subClass="text-amber-500/80"
         />
-        <Metric label="Avg Buy Price"  value={fmtCurrency(holding.average_buy_price)} />
+        <Metric label="Avg Buy Price"  value={fmtCurrency(holding.average_buy_price, currency)} />
         <Metric label="Quantity"       value={`${holding.quantity} units`} />
         <Metric label="Portfolio Wt."  value={fmtWeight(holding.current_weight)} />
       </dl>
 
-      {/* Estimated-price warning */}
+      {holding.fundamentals && (
+        <>
+          <hr className="border-surface-border" />
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 pt-1">
+            Fundamentals & Profile
+          </h3>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
+            <Metric label="Sector" value={holding.fundamentals.sector || 'N/A'} />
+            <Metric label="Industry" value={holding.fundamentals.industry || 'N/A'} />
+            <Metric label="P/E (Trailing)" value={holding.fundamentals.trailing_pe ? holding.fundamentals.trailing_pe.toFixed(2) : 'N/A'} />
+            <Metric label="P/E (Forward)" value={holding.fundamentals.forward_pe ? holding.fundamentals.forward_pe.toFixed(2) : 'N/A'} />
+            <Metric label="Dividend Yield" value={holding.fundamentals.dividend_yield ? `${(holding.fundamentals.dividend_yield * 100).toFixed(2)}%` : 'N/A'} />
+            <Metric label="Market Cap" value={holding.fundamentals.market_cap ? `$${(holding.fundamentals.market_cap / 1e9).toFixed(2)}B` : 'N/A'} />
+          </dl>
+        </>
+      )}
+
       {holding.price_is_estimated && (
         <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
           <svg className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -61,8 +72,6 @@ export default function HoldingDetailCard({ holding }) {
     </div>
   )
 }
-
-// ── Internal helper ────────────────────────────────────────────────────────
 
 function Metric({ label, value, sub, subClass = 'text-gray-600' }) {
   return (

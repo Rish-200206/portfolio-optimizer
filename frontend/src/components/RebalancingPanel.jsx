@@ -1,22 +1,6 @@
 import { fmtWeight } from '../utils/format'
 
-/**
- * RebalancingPanel.jsx
- * --------------------
- * Displays the PyPortfolioOpt max-Sharpe rebalancing recommendations.
- *
- * Layout
- * ------
- * 1. Three portfolio-level stats: expected return, expected vol, Sharpe ratio.
- * 2. Hero recommendation for the current ticker (prominent BUY / TRIM / HOLD badge).
- * 3. Full weight-change table for all tickers, each with a dual-bar weight visualiser.
- *
- * @param {object}  props
- * @param {import('../api/types').OptimisationResult | null} props.optimisation
- * @param {string}  props.activeTicker   – highlighted row in the table
- */
 export default function RebalancingPanel({ optimisation, activeTicker }) {
-  // ── No data state ──────────────────────────────────────────────────────
   if (!optimisation) {
     return (
       <div className="card p-5 h-full flex flex-col gap-3">
@@ -38,7 +22,6 @@ export default function RebalancingPanel({ optimisation, activeTicker }) {
     )
   }
 
-  // ── Active ticker's recommendation ─────────────────────────────────────
   const activeRec = optimisation.weights.find((r) => r.ticker === activeTicker)
   const action = activeRec
     ? activeRec.weight_delta > 0.005
@@ -63,7 +46,6 @@ export default function RebalancingPanel({ optimisation, activeTicker }) {
         </span>
       </h3>
 
-      {/* ── Portfolio performance stats ────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-3">
         <Stat
           label="Expected Return"
@@ -81,7 +63,6 @@ export default function RebalancingPanel({ optimisation, activeTicker }) {
         />
       </div>
 
-      {/* ── Hero action badge for the active ticker ───────────────────── */}
       {activeRec && (
         <div className={`flex items-center justify-between rounded-lg border px-4 py-3 ${actionStyle[action]}`}>
           <div>
@@ -102,7 +83,6 @@ export default function RebalancingPanel({ optimisation, activeTicker }) {
         </div>
       )}
 
-      {/* ── Full weight-change table ───────────────────────────────────── */}
       <div className="space-y-3">
         <p className="text-xs text-gray-600">All positions</p>
         {optimisation.weights.map((rec) => {
@@ -182,7 +162,6 @@ export default function RebalancingPanel({ optimisation, activeTicker }) {
   )
 }
 
-// ── Internal helper ────────────────────────────────────────────────────────
 
 function Stat({ label, value, valueClass = 'text-gray-100' }) {
   return (

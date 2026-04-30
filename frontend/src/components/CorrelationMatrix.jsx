@@ -1,14 +1,5 @@
 import React from 'react'
 
-/**
- * CorrelationMatrix.jsx
- * ---------------------
- * Displays the top highly correlated stock pairs. High correlation reduces
- * diversification benefits.
- *
- * @param {object} props
- * @param {Array<{ ticker_1: string, ticker_2: string, correlation: number }>} props.data
- */
 export default function CorrelationMatrix({ data }) {
   if (!data || data.length === 0) {
     return (

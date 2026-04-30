@@ -1,12 +1,3 @@
-/**
- * Spinner.jsx
- * -----------
- * Centred full-area loading indicator.
- *
- * @param {object} props
- * @param {string} [props.label="Loading…"] – accessible screen-reader text
- * @param {'sm'|'md'|'lg'} [props.size='md']
- */
 export default function Spinner({ label = 'Loading…', size = 'md' }) {
   const sz = { sm: 'h-5 w-5', md: 'h-8 w-8', lg: 'h-12 w-12' }[size]
 

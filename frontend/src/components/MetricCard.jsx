@@ -1,16 +1,3 @@
-/**
- * MetricCard.jsx
- * --------------
- * A compact stat tile used in the portfolio summary dashboard.
- *
- * @param {object} props
- * @param {string}  props.label      – small uppercase label above the value
- * @param {string}  props.value      – primary large display value
- * @param {string}  [props.sub]      – optional secondary line below value
- * @param {string}  [props.subClass] – Tailwind class for the sub text (e.g. 'gain' or 'loss')
- * @param {string}  [props.valueClass] – Tailwind class for the main value
- * @param {React.ReactNode} [props.icon] – optional icon node (top-right)
- */
 export default function MetricCard({
   label,
   value,

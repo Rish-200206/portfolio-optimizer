@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react'
 import {
   AreaChart,
   Area,
@@ -9,28 +10,33 @@ import {
   ReferenceLine,
 } from 'recharts'
 import { fmtCurrency } from '../utils/format'
+import { currencyFromTicker, currencySymbol } from '../utils/currency'
 
-/**
- * PriceChart.jsx
- * --------------
- * Recharts AreaChart displaying 1-year daily close prices for a single ticker.
- *
- * Design decisions
- * ----------------
- * - Uses AreaChart with a translucent gradient fill to give depth without clutter.
- * - Line / fill colour is indigo (neutral) — the P&L colour is shown in HoldingDetailCard.
- * - Only ~12 X-axis labels are shown (one per month) using a date-filter approach.
- * - A dashed ReferenceLine marks the ticker's average buy price so the user can
- *   immediately see whether they're in-the-money.
- * - Dots are disabled for performance on 250+ data points; the activeDot appears
- *   only on hover.
- *
- * @param {object}   props
- * @param {Array<{ date: string, close: number }>} props.data
- * @param {string}   props.ticker
- * @param {number}   [props.avgBuyPrice]  – shows a reference line when provided
- */
+const TIME_RANGES = [
+  { label: '1M',  days: 30 },
+  { label: '3M',  days: 90 },
+  { label: '6M',  days: 180 },
+  { label: '1Y',  days: 365 },
+  { label: '5Y',  days: 1825 },
+  { label: 'All', days: Infinity },
+]
+
 export default function PriceChart({ data, ticker, avgBuyPrice }) {
+  const [selectedRange, setSelectedRange] = useState('1Y')
+
+  // Filter data based on selected time range
+  const filteredData = useMemo(() => {
+    if (!data || data.length === 0) return []
+    const range = TIME_RANGES.find((r) => r.label === selectedRange)
+    if (!range || range.days === Infinity) return data
+
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - range.days)
+    const cutoffStr = cutoffDate.toISOString().slice(0, 10)
+
+    return data.filter((d) => d.date >= cutoffStr)
+  }, [data, selectedRange])
+
   if (!data || data.length === 0) {
     return (
       <div className="card p-6 flex flex-col items-center justify-center h-64 gap-3 text-center">
@@ -42,35 +48,74 @@ export default function PriceChart({ data, ticker, avgBuyPrice }) {
           <p className="text-sm text-gray-500 font-medium">No price data available</p>
           <p className="text-xs text-gray-600 mt-1">
             Click <span className="text-gray-400">Refresh Prices</span> in the navbar
-            to fetch 1-year history from yfinance.
+            to fetch price history from yfinance.
           </p>
         </div>
       </div>
     )
   }
 
-  // ── Compute stats ────────────────────────────────────────────────────────
-  const closes      = data.map((d) => d.close)
+  const chartData = filteredData.length > 0 ? filteredData : data
+  const currency  = currencyFromTicker(ticker)
+  const symb      = currencySymbol(currency)
+
+  const closes      = chartData.map((d) => d.close)
   const minClose    = Math.min(...closes)
   const maxClose    = Math.max(...closes)
   const firstClose  = closes[0]
   const lastClose   = closes[closes.length - 1]
-  const ytdChange   = ((lastClose - firstClose) / firstClose) * 100
+  const periodChange = ((lastClose - firstClose) / firstClose) * 100
 
   // Y-axis padding (5% either side so the line doesn't touch the edges)
-  const yPad    = (maxClose - minClose) * 0.08
+  const yPad    = (maxClose - minClose) * 0.08 || 1
   const yDomain = [minClose - yPad, maxClose + yPad]
 
-  // ── Reduce X-axis ticks: show only first trading day of each month ───────
-  const monthTicks = data
-    .filter((d, i) => {
-      if (i === 0) return true
-      return d.date.slice(8) <= '07' // first 7 days of the month
-        && data[i - 1].date.slice(5, 7) !== d.date.slice(5, 7)
-    })
-    .map((d) => d.date)
+  const monthTicks = useMemo(() => {
+    if (chartData.length === 0) return []
 
-  // ── Custom tooltip ───────────────────────────────────────────────────────
+    // For ranges > 2 years, show yearly + mid-year ticks
+    const dataSpanDays = (new Date(chartData[chartData.length - 1].date) - new Date(chartData[0].date)) / (1000 * 86400)
+
+    if (dataSpanDays > 730) {
+      // Multi-year: show ~Jan of each year
+      return chartData
+        .filter((d, i) => {
+          if (i === 0) return true
+          return d.date.slice(5, 7) === '01' && d.date.slice(8) <= '07'
+            && chartData[i - 1].date.slice(5, 7) !== '01'
+        })
+        .map((d) => d.date)
+    }
+
+    // Under 2 years: show first trading day of each month
+    return chartData
+      .filter((d, i) => {
+        if (i === 0) return true
+        return d.date.slice(8) <= '07'
+          && chartData[i - 1].date.slice(5, 7) !== d.date.slice(5, 7)
+      })
+      .map((d) => d.date)
+  }, [chartData])
+
+  const dataSpanDays = chartData.length > 1
+    ? (new Date(chartData[chartData.length - 1].date) - new Date(chartData[0].date)) / (1000 * 86400)
+    : 0
+
+  const formatTick = (v) => {
+    const [y, m] = v.split('-')
+    const months = ['', 'Jan','Feb','Mar','Apr','May','Jun',
+                    'Jul','Aug','Sep','Oct','Nov','Dec']
+    if (dataSpanDays > 730) {
+      // Multi-year: show "Jan '23"
+      return m === '01' ? `'${y.slice(2)}` : months[parseInt(m, 10)]
+    }
+    return months[parseInt(m, 10)]
+  }
+
+  const rangeLabel = selectedRange === 'All'
+    ? `${chartData[0]?.date?.slice(0, 4)} – ${chartData[chartData.length - 1]?.date?.slice(0, 4)}`
+    : selectedRange
+
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null
     const close = payload[0].value
@@ -78,7 +123,7 @@ export default function PriceChart({ data, ticker, avgBuyPrice }) {
     return (
       <div className="card px-3 py-2 text-xs shadow-xl">
         <p className="text-gray-400 mb-1">{label}</p>
-        <p className="text-white font-semibold num">{fmtCurrency(close)}</p>
+        <p className="text-white font-semibold num">{fmtCurrency(close, currency)}</p>
         <p className={change >= 0 ? 'gain' : 'loss'}>
           {change >= 0 ? '+' : ''}{change.toFixed(2)}% from start
         </p>
@@ -86,34 +131,62 @@ export default function PriceChart({ data, ticker, avgBuyPrice }) {
     )
   }
 
-  // ── Gradient id (unique per ticker to avoid SVG id collision) ────────────
+  // unique gradient id per ticker to avoid SVG defs collision when multiple charts render
   const gradientId = `grad-${ticker.replace(/\W/g, '')}`
 
   return (
     <div className="card p-5 space-y-3">
       {/* Header row */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-            {ticker} — 1-Year Price History
+            {ticker} — Price History
           </h3>
         </div>
         <div className="flex items-center gap-4 text-xs text-gray-500">
           <span>
-            52w Low: <span className="text-gray-300 num">{fmtCurrency(minClose)}</span>
+            Low: <span className="text-gray-300 num">{fmtCurrency(minClose, currency)}</span>
           </span>
           <span>
-            52w High: <span className="text-gray-300 num">{fmtCurrency(maxClose)}</span>
+            High: <span className="text-gray-300 num">{fmtCurrency(maxClose, currency)}</span>
           </span>
-          <span className={ytdChange >= 0 ? 'gain num' : 'loss num'}>
-            YTD {ytdChange >= 0 ? '+' : ''}{ytdChange.toFixed(1)}%
+          <span className={periodChange >= 0 ? 'gain num' : 'loss num'}>
+            {rangeLabel} {periodChange >= 0 ? '+' : ''}{periodChange.toFixed(1)}%
           </span>
         </div>
       </div>
 
+      {/* Time range filter buttons */}
+      <div className="flex gap-1">
+        {TIME_RANGES.map((range) => {
+          // Hide 5Y/All if we don't have enough data
+          const totalDays = data.length > 1
+            ? (new Date(data[data.length - 1].date) - new Date(data[0].date)) / (1000 * 86400)
+            : 0
+          if (range.days > totalDays * 1.1 && range.days !== Infinity && totalDays < range.days * 0.8) {
+            return null
+          }
+
+          const isActive = selectedRange === range.label
+          return (
+            <button
+              key={range.label}
+              onClick={() => setSelectedRange(range.label)}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all
+                ${isActive
+                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30'
+                  : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
+                }`}
+            >
+              {range.label}
+            </button>
+          )
+        })}
+      </div>
+
       {/* Chart */}
       <ResponsiveContainer width="100%" height={280}>
-        <AreaChart data={data} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
+        <AreaChart data={chartData} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.25} />
@@ -133,12 +206,7 @@ export default function PriceChart({ data, ticker, avgBuyPrice }) {
             tick={{ fill: '#6b7280', fontSize: 10 }}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(v) => {
-              const [, m, ] = v.split('-')
-              const months = ['', 'Jan','Feb','Mar','Apr','May','Jun',
-                              'Jul','Aug','Sep','Oct','Nov','Dec']
-              return months[parseInt(m, 10)]
-            }}
+            tickFormatter={formatTick}
           />
 
           <YAxis
@@ -146,7 +214,7 @@ export default function PriceChart({ data, ticker, avgBuyPrice }) {
             tick={{ fill: '#6b7280', fontSize: 10 }}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(v) => `$${v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v.toFixed(0)}`}
+            tickFormatter={(v) => `${symb}${v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v.toFixed(0)}`}
             width={52}
           />
 

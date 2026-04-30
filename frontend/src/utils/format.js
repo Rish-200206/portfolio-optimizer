@@ -1,37 +1,40 @@
+// Intl.NumberFormat cache keyed by "CURRENCY:compact"
+const _fmt = new Map()
+
+function getFormatter(currency = 'USD', compact = false) {
+  const key = `${currency}:${compact}`
+  if (!_fmt.has(key)) {
+    _fmt.set(
+      key,
+      new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency,
+        ...(compact
+          ? { notation: 'compact', maximumFractionDigits: 1 }
+          : { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      }),
+    )
+  }
+  return _fmt.get(key)
+}
+
 /**
- * utils/format.js
- * ---------------
- * Formatting helpers used across the dashboard components.
- * All functions are pure and have no side effects.
- */
-
-const USD = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-})
-
-const COMPACT_USD = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  notation: 'compact',
-  maximumFractionDigits: 1,
-})
-
-/**
- * Format a number as a full USD currency string.
+ * Format a number as a currency string.
  * @param {number} n
- * @returns {string} e.g. "$125,430.50"
+ * @param {string} [currency='USD']  ISO 4217 code, e.g. 'INR', 'GBP'
+ * @returns {string} e.g. "₹1,25,430.50" | "$125,430.50"
  */
-export const fmtCurrency = (n) => USD.format(n)
+export const fmtCurrency = (n, currency = 'USD') =>
+  getFormatter(currency).format(n)
 
 /**
  * Format a large number in compact notation.
  * @param {number} n
- * @returns {string} e.g. "$125.4K"
+ * @param {string} [currency='USD']
+ * @returns {string} e.g. "₹1.2L" | "$125.4K"
  */
-export const fmtCompact = (n) => COMPACT_USD.format(n)
+export const fmtCompact = (n, currency = 'USD') =>
+  getFormatter(currency, true).format(n)
 
 /**
  * Format a decimal fraction as a percentage with a sign prefix.
@@ -66,6 +69,8 @@ export const gainLossClass = (n) => (n > 0 ? 'gain' : n < 0 ? 'loss' : 'flat')
 /**
  * Return a sign-prefixed currency string for a P&L value.
  * @param {number} n
- * @returns {string} e.g. "+$10,430.50" or "-$3,210.00"
+ * @param {string} [currency='USD']
+ * @returns {string} e.g. "+₹10,430.50" or "-₹3,210.00"
  */
-export const fmtPnlCurrency = (n) => `${n >= 0 ? '+' : ''}${fmtCurrency(n)}`
+export const fmtPnlCurrency = (n, currency = 'USD') =>
+  n >= 0 ? `+${fmtCurrency(n, currency)}` : fmtCurrency(n, currency)

@@ -1,28 +1,15 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { refreshPrices } from '../api/client'
 
 /**
- * Navbar.jsx
- * ----------
- * Top navigation bar.
- * - Left:  app logo / title (links to home)
- * - Right: portfolio selector + "Refresh Prices" action button
- *
  * @param {object}   props
- * @param {string[]} props.portfolios          – list of portfolio IDs from the API
- * @param {string|null} props.selectedPortfolio
- * @param {(id: string) => void} props.onSelectPortfolio
+ * @param {string}   props.selectedPortfolio
+ * @param {() => void} props.onAddStock
  */
-export default function Navbar({ portfolios, selectedPortfolio, onSelectPortfolio }) {
-  const [refreshing, setRefreshing] = useState(false)
+export default function Navbar({ selectedPortfolio, onAddStock, onRefreshComplete }) {
+  const [refreshing, setRefreshing]       = useState(false)
   const [refreshResult, setRefreshResult] = useState(null) // 'ok' | 'error'
-  const navigate = useNavigate()
-
-  const handleSelectChange = (e) => {
-    onSelectPortfolio(e.target.value)
-    navigate('/')
-  }
 
   const handleRefresh = async () => {
     if (!selectedPortfolio || refreshing) return
@@ -31,11 +18,11 @@ export default function Navbar({ portfolios, selectedPortfolio, onSelectPortfoli
     try {
       await refreshPrices(selectedPortfolio, false)
       setRefreshResult('ok')
+      onRefreshComplete?.()   // tell SummaryPage to reload analytics
     } catch {
       setRefreshResult('error')
     } finally {
       setRefreshing(false)
-      // Auto-clear the status badge after 3 s
       setTimeout(() => setRefreshResult(null), 3000)
     }
   }
@@ -59,34 +46,24 @@ export default function Navbar({ portfolios, selectedPortfolio, onSelectPortfoli
         {/* Right controls */}
         <div className="flex items-center gap-3">
 
-          {/* Portfolio selector */}
-          {portfolios.length > 0 && (
-            <div className="relative">
-              <select
-                value={selectedPortfolio ?? ''}
-                onChange={handleSelectChange}
-                className="appearance-none bg-surface-border border border-surface-border text-gray-200
-                           text-sm rounded-lg pl-3 pr-8 py-2 focus:outline-none focus:ring-2
-                           focus:ring-indigo-500 cursor-pointer hover:border-gray-600 transition-colors"
-              >
-                {portfolios.map((pid) => (
-                  <option key={pid} value={pid}>{pid}</option>
-                ))}
-              </select>
-              {/* Dropdown chevron */}
-              <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none"
-                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          )}
+          {/* Add Stock button */}
+          <button
+            onClick={onAddStock}
+            className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border
+                       border-indigo-600/50 text-indigo-400 hover:bg-indigo-600/10 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span className="hidden sm:inline">Add Stock</span>
+          </button>
 
           {/* Refresh Prices button */}
           {selectedPortfolio && (
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              title="Fetch latest prices from yfinance and update the database"
+              title="Fetch latest closing prices from yfinance"
               className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg border transition-all
                 ${refreshResult === 'ok'
                   ? 'border-emerald-600 text-emerald-400 bg-emerald-600/10'

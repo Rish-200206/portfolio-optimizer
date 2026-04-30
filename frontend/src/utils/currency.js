@@ -1,19 +1,5 @@
-/**
- * utils/currency.js
- * -----------------
- * Maps ticker exchange suffixes to ISO 4217 currency codes.
- *
- * yfinance supports equities on virtually every major world exchange.
- * Tickers without a suffix are assumed to be on a US exchange (USD).
- * Suffixes are the part after the last '.' in the ticker symbol.
- *
- * Examples:
- *   AAPL        → USD  (no suffix = US exchange)
- *   RELIANCE.NS → INR  (NSE India)
- *   BP.L        → GBP  (London)
- *   SAP.DE      → EUR  (Xetra / Frankfurt)
- *   7203.T      → JPY  (Tokyo)
- */
+// Maps ticker suffixes to ISO 4217 currency codes.
+// AAPL → USD (no suffix), RELIANCE.NS → INR, BP.L → GBP, SAP.DE → EUR
 
 const SUFFIX_TO_CURRENCY = {
   // India
