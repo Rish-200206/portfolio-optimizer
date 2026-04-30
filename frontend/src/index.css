@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: #0d1117;
+    color: #e6edf3;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0d1117;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #21262d;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #30363d;
+  }
+}
+
+@layer components {
+  /* Re-usable card shell */
+  .card {
+    @apply bg-surface-card border border-surface-border rounded-xl;
+  }
+
+  /* Positive / negative colour helpers */
+  .gain  { @apply text-emerald-400; }
+  .loss  { @apply text-red-400; }
+  .flat  { @apply text-gray-400; }
+
+  /* Mono number rendering */
+  .num { @apply font-mono tabular-nums; }
+
+  /* ── Markdown prose (used by AiAdvisorPanel) ───────────────────── */
+  .md-prose h2 {
+    @apply text-sm font-semibold text-white uppercase tracking-wider mt-5 mb-2;
+  }
+  .md-prose h3 {
+    @apply text-sm font-semibold text-gray-200 mt-4 mb-1.5;
+  }
+  .md-prose p {
+    @apply text-sm text-gray-300 leading-relaxed mb-3;
+  }
+  .md-prose ul {
+    @apply list-disc list-inside space-y-1 mb-3;
+  }
+  .md-prose ol {
+    @apply list-decimal list-inside space-y-1 mb-3;
+  }
+  .md-prose li {
+    @apply text-sm text-gray-300 leading-relaxed;
+  }
+  .md-prose strong {
+    @apply font-semibold text-white;
+  }
+  .md-prose em {
+    @apply italic text-gray-400;
+  }
+  .md-prose blockquote {
+    @apply border-l-2 border-amber-500/60 pl-3 text-amber-300/80 italic text-xs my-3;
+  }
+  .md-prose code {
+    @apply font-mono text-xs bg-surface-border px-1.5 py-0.5 rounded text-indigo-300;
+  }
+  .md-prose hr {
+    @apply border-surface-border my-4;
+  }
+}

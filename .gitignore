@@ -1,0 +1,65 @@
+# ── Python virtual environment ────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Python cache / build artefacts ───────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── DuckDB database (local on-disk data — never commit) ──────────────────
+*.duckdb
+*.duckdb.wal
+
+# ── yfinance local parquet price cache ───────────────────────────────────
+backend/price_cache/*.parquet
+
+# ── Environment / secrets ────────────────────────────────────────────────
+.env
+.env.*
+*.env
+secrets.json
+
+# ── Node / frontend ───────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ── macOS system files ────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# ── Editor / IDE ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.project
+.classpath
+
+# ── Logs ─────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── pytest / coverage ─────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ── Graphify knowledge-graph output (regenerated on demand) ──────────────
+graphify-out/
+
+# ── Private session notes (not for public repo) ──────────────────────────
+session-notes.md
